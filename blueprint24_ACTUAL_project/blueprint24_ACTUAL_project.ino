@@ -98,12 +98,12 @@ void setup() {
 2 - "pen/pentatonic" pentatonic scale
 4 - "arp/arpeggio" c arpeggio
 */
-int getTone(int value, int option) {
+int getTone(int note, int option) {
   switch (option) {
     case 0:
-      return 440 * pow(1.0594631, value);
+      return 440 * pow(1.0594631, note);
     case 1:
-      switch (value) {
+      switch (note) {
         case 0:
           return 523; // C5
         case 1:
@@ -289,7 +289,7 @@ void metronome_sound() {
   digitalWrite(BUZZER, HIGH);
   delay(10);
   digitalWrite(BUZZER, LOW);
-  delay(60000 / tempo);
+  //delay(60000 / tempo);
 }
 
 // function to display current bpm
@@ -316,7 +316,9 @@ void buttonPress() {
   }
 }
 
+int metct = 0;
 void loop() {
+  delay(sampleRate);
   buttonPress();
   int distCm = ping();
   int note = 0;
@@ -325,8 +327,12 @@ void loop() {
   }
 
   // play and calculate metronome
-  metronome_bpm();
-  metronome_sound();
+  if (metct == 0) {
+    metronome_bpm();
+    metronome_sound();
+  }
+  metct++;
+  metct = metct % 20;
 
   writeSpeaker(note+4);
 }
