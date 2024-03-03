@@ -10,7 +10,7 @@
 #define TWO 6
 #define FOUR 8
 #define EIGHT 10
-#define BUZZER A2
+#define BUZZER 3
 
 void setup () {
   // set up computer and master serial
