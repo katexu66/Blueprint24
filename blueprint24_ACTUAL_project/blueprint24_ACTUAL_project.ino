@@ -150,7 +150,6 @@ int getTone(int note, int option) {
             return 880; // A5
           case 5:
             return 1047; //C6
-        }
     default:
      return 440;
   }
