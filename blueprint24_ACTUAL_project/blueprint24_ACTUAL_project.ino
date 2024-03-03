@@ -9,13 +9,13 @@
                     3.3[------------------]10
                      5V[------------------]9 buzzer (1)
                     GND[------------------]8
-                    GND[------------------]7
+                    GND[------------------]7 Joystick button
                     Vin[------------------]6
                      A0[------------------]5
-                     A1[------------------]4
-potentiometer buzzer A2[------------------]3
-                     A3[------------------]2 button for potentiometer
-                     A4[------------------]1
+          joystick x A1[------------------]4
+potentiometer buzzer A2[------------------]3 metronnome buzzer
+                 SCL A3[------------------]2 button for potentiometer
+                 SDA A4[------------------]1
        potentiometer A5[------------------]0
 
 
@@ -65,7 +65,7 @@ void setup() {
 
 // buzzers
 void anaBuzzerOff() {
-  //noTone(ANA_BUZZER);
+  noTone(ANA_BUZZER);
 }
 
 void setDistanceBuzzer(int val, int min, int max) {
@@ -98,7 +98,7 @@ void button() {
 void pot() {
   int pot_value = analogRead(POT_PIN);
   int ana_value = map(pot_value, 0, 1023, 262, 523);
-  //tone(ANA_BUZZER, ana_value);
+  tone(ANA_BUZZER, ana_value);
 }
 
 // processing 
