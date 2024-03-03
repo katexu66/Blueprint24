@@ -48,10 +48,6 @@ potentiometer buzzer A2[------------------]3 metronnome buzzer
 #define SCREEN_ADDRESS 0x3c
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-// library objects
-TonePlayer tone1(TCCR1A, TCCR1B, OCR1AH, OCR1AL, TCNT1H, TCNT1L);  // pin D9
-NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);                // NewPing setup of pins and maximum distance.
-
 // options
 #define bpm 2000 // max: 2000 for "smooth" sampling
 int sampleRate = 60000 / bpm;
@@ -64,7 +60,7 @@ TonePlayer tone1 (TCCR1A, TCCR1B, OCR1AH, OCR1AL, TCNT1H, TCNT1L);  // pin D9
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
 // var for metronome
-int bpm = 100;
+int tempo = 100;
 
 void setup() {
   Serial.begin(115200);  // Open serial monitor at 115200 baud
@@ -158,13 +154,14 @@ void anaBuzzerOff() {
   //noTone(ANA_BUZZER);
 }
 
-void setDistanceBuzzer(int val, int min, int max) {
+void setDistanceBuzzer(int val, int min, int max, int *note) {
   int scaled = getTone(map(val, min, max, 0, 12), 1);
+  *note = scaled;
   Serial.println(scaled);
   tone1.tone(scaled);
 }
 
-void distSensorUpdate() {
+void distSensorUpdate(int *note) {
   delay(sampleRate);  // Wait 50ms between pings (about 20 pings/sec). 29ms should be the shortest delay between pings.
   Serial.print("Ping: ");
   int newDistance = sonar.ping_cm();
@@ -179,27 +176,27 @@ void distSensorUpdate() {
     }
     Serial.println();
     Serial.println(newAverage);
-    setDistanceBuzzer(newAverage, 0, MAX_DISTANCE);
+    setDistanceBuzzer(newAverage, 0, MAX_DISTANCE, note);
     #else 
-    setDistanceBuzzer(newDistance, 0, MAX_DISTANCE);
+    setDistanceBuzzer(newDistance, 0, MAX_DISTANCE, note);
     #endif
   }
 }
 
 // control
-void button() {
+void button(int note) {
   if (digitalRead(BUTTON) == 0) {
-    pot();
+    pot(note);
   } else {
     anaBuzzerOff();
   }
 }
 
-void pot() {
+void pot(int note) {
   int pot_value = analogRead(POT_PIN);
   int ana_value = map(pot_value, 0, 1023, 262, 523);
   if (analogRead(POT_PIN) > 512) {
-    int ana_value = scaled*1.0595*3;
+    int ana_value = note*1.0595*3;
     tone(ANA_BUZZER, ana_value);
   }
 }
@@ -215,22 +212,22 @@ void metronome_bpm() {
   int joystick_value_x = analogRead(JOYSTICK_X);
   if (joystick_value_x >= 700) {
     // moving joystick to the right raises bpm
-    bpm += 1;
+    tempo += 1;
     display_bpm();
   } else if (joystick_value_x <= 300) {
     // moving joystick to the left lowers bpm
-    bpm -= 1;
+    tempo -= 1;
     display_bpm();
   }
 }
 
-// function to play metronome at the correct bpm
+// function to play metronome at the correct tempo
 void metronome_sound() {
 
   digitalWrite(BUZZER, HIGH);
   delay(10);
   digitalWrite(BUZZER, LOW);
-  delay(60000 / bpm);
+  delay(60000 / tempo);
 }
 
 // function to display current bpm
@@ -244,8 +241,9 @@ void display_bpm() {
 }
 
 void loop() {
-  distSensorUpdate();
-  button();
+  int note = 0;
+  distSensorUpdate(&note);
+  button(note);
 
   // play and calculate metronome
   metronome_bpm();
