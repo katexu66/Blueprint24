@@ -305,7 +305,7 @@ void loop() {
   int distCm = ping();
   int note = 0;
   if (distCm != 0) {
-    note = buzzerUpdate(distCm, 0);
+    note = buzzerUpdate(distCm, buttonPresses);
   }
 
   // play and calculate metronome
