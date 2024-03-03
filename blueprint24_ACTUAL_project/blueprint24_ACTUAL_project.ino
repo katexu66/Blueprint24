@@ -292,8 +292,10 @@ void buttonPress() {
   if (digitalRead(BUTTON) == 0) {
     if (buttonPresses == 5) {
       buttonPresses = 0;
+      delay(500);
     } else {
       buttonPresses = buttonPresses + 1;
+      delay(500);
     }
   }
 }
