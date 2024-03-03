@@ -14,9 +14,9 @@
                      A0[------------------]5
           joystick x A1[------------------]4
 potentiometer buzzer A2[------------------]3 metronnome buzzer
-                 SCL A3[------------------]2 button for potentiometer
+       potentiometer A3[------------------]2 button for potentiometer
                  SDA A4[------------------]1
-       potentiometer A5[------------------]0
+                 SCL A5[------------------]0
 
 
 
@@ -34,9 +34,8 @@ potentiometer buzzer A2[------------------]3 metronnome buzzer
 #define ECHO_PIN     11  // Arduino pin tied to echo pin on the ultrasonic sensor.
 #define MAX_DISTANCE 48 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 #define BUTTON 2
-#define POT_PIN A5
+#define POT_PIN A3
 #define JOYSTICK_X A4
-#define JOYSTICK_Y A3
 #define JOYSTICK_BTN 3
 #define ANA_BUZZER A2
 
