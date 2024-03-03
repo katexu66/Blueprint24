@@ -53,8 +53,10 @@ TonePlayer tone1(TCCR1A, TCCR1B, OCR1AH, OCR1AL, TCNT1H, TCNT1L);  // pin D9
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);                // NewPing setup of pins and maximum distance.
 
 // options
-#define bpm 6000
+#define bpm 2000 // max: 2000 for "smooth" sampling
 int sampleRate = 60000 / bpm;
+#define INERTIA_MODE true
+#define INERTIA_AMOUNT 10 // number of previous values remembered
 
 // var for metronome
 int bpm = 100;
@@ -77,15 +79,31 @@ void setup() {
   display_bpm();
 }
 
+// processing 
+int getTone(int value) {
+  return 440 * pow(1.0594631, value);
+}
+
+int prevDists[INERTIA_AMOUNT]; // store last twenty samplings to average out and make changes smoother
+// remove oldest sample and add new, then return new average
+int nextSample(int newValue) {
+  for (int i = 1; i < INERTIA_AMOUNT; i++) {
+    prevDists[i-1] = prevDists[i];
+  }
+  prevDists[INERTIA_AMOUNT-1] = newValue;
+  int sum = 0;
+  for (int i = 0; i < INERTIA_AMOUNT; i++) {
+    sum += prevDists[i];
+  }
+  return sum/INERTIA_AMOUNT;
+}
+
 // buzzers
 void anaBuzzerOff() {
   noTone(ANA_BUZZER);
 }
 
 void setDistanceBuzzer(int val, int min, int max) {
-  if (val == 0) {
-    return;
-  }
   int scaled = getTone(map(val, min, max, 0, 12));
   Serial.println(scaled);
   tone1.tone(scaled);
@@ -94,10 +112,28 @@ void setDistanceBuzzer(int val, int min, int max) {
 void distSensorUpdate() {
   delay(sampleRate);  // Wait 50ms between pings (about 20 pings/sec). 29ms should be the shortest delay between pings.
   Serial.print("Ping: ");
+<<<<<<< HEAD
   int distance = sonar.ping_cm();
   Serial.print(distance);  // Send ping, get distance in cm and print result (0 = outside set distance range)
+=======
+  int newDistance = sonar.ping_cm();
+  Serial.print(newDistance); // Send ping, get distance in cm and print result (0 = outside set distance range)
+>>>>>>> c9d9f4000ebc6122c5338ebf39bba8c5abcb55e3
   Serial.println("cm");
-  setDistanceBuzzer(distance, 0, MAX_DISTANCE);
+  if (newDistance != 0) {
+    #ifdef INERTIA_MODE
+    int newAverage = nextSample(newDistance);
+    for (int i = 0; i < 20; i++) {
+      Serial.print(prevDists[i]); 
+      Serial.print(", ");
+    }
+    Serial.println();
+    Serial.println(newAverage);
+    setDistanceBuzzer(newAverage, 0, MAX_DISTANCE);
+    #else 
+    setDistanceBuzzer(newDistance, 0, MAX_DISTANCE);
+    #endif
+  }
 }
 
 // control
@@ -115,6 +151,7 @@ void pot() {
   tone(ANA_BUZZER, ana_value);
 }
 
+<<<<<<< HEAD
 // processing
 int getTone(int value) {
   return 440 * pow(1.0594631, value);
@@ -154,6 +191,8 @@ void display_bpm() {
   display.display();
 }
 
+=======
+>>>>>>> c9d9f4000ebc6122c5338ebf39bba8c5abcb55e3
 void loop() {
   distSensorUpdate();
   button();
