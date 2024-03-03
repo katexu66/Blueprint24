@@ -22,7 +22,17 @@
 
 */
 
+// imports
+#include <NewPing.h>
+
+// tone library hack
+#include <TonePlayer.h>
+
 // ports
+#define BUZZER_PWM_PIN 9
+#define TRIGGER_PIN  12  // Arduino pin tied to trigger pin on the ultrasonic sensor.
+#define ECHO_PIN     11  // Arduino pin tied to echo pin on the ultrasonic sensor.
+#define MAX_DISTANCE 48 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 #define LED 11
 #define BUTTON 2
 #define POT_PIN A5
@@ -31,6 +41,10 @@
 #define JOYSTICK_BTN 3
 #define ANA_BUZZER A2
 #define DIGI_BUZZER 4
+
+// library objects
+TonePlayer tone1 (TCCR1A, TCCR1B, OCR1AH, OCR1AL, TCNT1H, TCNT1L);  // pin D9
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
 void setup() {
 
