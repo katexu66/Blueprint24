@@ -198,7 +198,10 @@ void button() {
 void pot() {
   int pot_value = analogRead(POT_PIN);
   int ana_value = map(pot_value, 0, 1023, 262, 523);
-  //tone(ANA_BUZZER, ana_value);
+  if (analogRead(POT_PIN) > 512) {
+    int ana_value = scaled*1.0595*3;
+    tone(ANA_BUZZER, ana_value);
+  }
 }
 
 // processing
