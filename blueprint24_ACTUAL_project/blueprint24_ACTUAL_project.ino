@@ -57,6 +57,7 @@ int sampleRate = 60000 / bpm;
 
 // library objects
 TonePlayer tone1 (TCCR1A, TCCR1B, OCR1AH, OCR1AL, TCNT1H, TCNT1L);  // pin D9
+TonePlayer tone2 ();
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
 // var for metronome
