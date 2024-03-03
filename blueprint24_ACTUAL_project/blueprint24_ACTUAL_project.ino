@@ -94,8 +94,8 @@ void setup() {
 /*
 0 - "free": half steps
 1 - "maj/major": c major scale
-2 - "min/minor": a minor scale
-3 - "pen/pentatonic" pentatonic scale
+3 - "min/minor": a minor scale
+2 - "pen/pentatonic" pentatonic scale
 4 - "arp/arpeggio" c arpeggio
 */
 int getTone(int value, int option) {
@@ -136,8 +136,21 @@ int getTone(int value, int option) {
           return 2093; // C7
         default:
           return 262; // C4
-        
-      }
+      case 2:
+        switch (value) {
+          case 0:
+            return 523; // C5
+          case 1:
+            return 587; // D5
+          case 2:
+            return 659; // E5
+          case 3:
+            return 784; // G5
+          case 4:
+            return 880; // A5
+          case 5:
+            return 1047; //C6
+        }
     default:
      return 440;
   }
@@ -170,7 +183,10 @@ int setDistanceBuzzer(int val, int min, int max, int scaleOption) {
       scaleMax = 12;
       break;
     case 1:
-      scaleMax = 8;
+      scaleMax = 14;
+      break;
+    case 2:
+      scaleMax = 5;
       break;
     default:
       scaleMax = 0;
