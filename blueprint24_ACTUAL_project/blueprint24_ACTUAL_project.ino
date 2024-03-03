@@ -40,6 +40,10 @@ potentiometer buzzer A2[------------------]3 metronnome buzzer
 #define JOYSTICK_BTN 7
 #define ANA_BUZZER A2
 #define BUZZER 3
+#define ONE 5
+#define TWO 6
+#define FOUR 8
+#define EIGHT 10
 
 // screen display
 #define SCREEN_WIDTH 128
@@ -57,7 +61,6 @@ int sampleRate = 60000 / bpm;
 
 // library objects
 TonePlayer tone1 (TCCR1A, TCCR1B, OCR1AH, OCR1AL, TCNT1H, TCNT1L);  // pin D9
-TonePlayer tone2 ();
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
 // var for metronome
@@ -65,6 +68,8 @@ int tempo = 100;
 
 void setup() {
   Serial.begin(115200);  // Open serial monitor at 115200 baud
+  while(!Serial);
+  Serial.println("begin");
 
   // pin modes
   pinMode(BUTTON, INPUT_PULLUP);
@@ -75,6 +80,10 @@ void setup() {
   pinMode(ANA_BUZZER, OUTPUT);
   pinMode(BUZZER_PWM_PIN, OUTPUT);
   analogWrite(BUZZER_PWM_PIN, 512);
+  pinMode(ONE, OUTPUT);
+  pinMode(TWO, OUTPUT);
+  pinMode(FOUR, OUTPUT);
+  pinMode(EIGHT, OUTPUT);
 
   // screen display
   display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
@@ -184,7 +193,26 @@ void distSensorUpdate(int *note) {
   }
 }
 
-// control
+// slave communication
+void setSlave(uint8_t note) {
+  bool eight = (note >> 3) & (uint8_t)1;
+  bool four = (note >> 2) & (uint8_t)1;
+  bool two = (note >> 1) & (uint8_t)1;
+  bool one = (note >> 0) & (uint8_t)1;
+  Serial.print("original number: ");
+  Serial.println(note);
+  Serial.print("bits: ");
+  Serial.print(eight); Serial.print(" ");
+  Serial.print(four); Serial.print(" ");
+  Serial.print(two); Serial.print(" ");
+  Serial.print(one); Serial.println();
+  digitalWrite(EIGHT, eight);
+  digitalWrite(FOUR, four);
+  digitalWrite(TWO, two);
+  digitalWrite(ONE, one);
+}
+
+// input 
 void button(int note) {
   if (digitalRead(BUTTON) == 0) {
     pot(note);
@@ -198,7 +226,7 @@ void pot(int note) {
   int ana_value = map(pot_value, 0, 1023, 262, 523);
   if (analogRead(POT_PIN) > 512) {
     int ana_value = note*1.0595*3;
-    tone(ANA_BUZZER, ana_value);
+    //tone(ANA_BUZZER, ana_value);
   }
 }
 
@@ -241,12 +269,16 @@ void display_bpm() {
   display.display();
 }
 
+int j = 0;
 void loop() {
-  int note = 0;
-  distSensorUpdate(&note);
-  button(note);
+  // int note = 0;
+  // distSensorUpdate(&note);
+  // button(note);
 
-  // play and calculate metronome
-  metronome_bpm();
-  metronome_sound();
+  // // play and calculate metronome
+  // metronome_bpm();
+  // metronome_sound();
+  j++;
+  setSlave(j);
+  delay(1000);
 }
