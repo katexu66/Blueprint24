@@ -35,8 +35,7 @@ potentiometer buzzer A2[------------------]3 metronnome buzzer
 #define ECHO_PIN     11  // Arduino pin tied to echo pin on the ultrasonic sensor.
 #define BUTTON 2
 #define POT_PIN A3
-#define JOYSTICK_X A4
-#define JOYSTICK_Y A1
+#define JOYSTICK_X A1
 #define JOYSTICK_BTN 7
 #define ANA_BUZZER A2
 #define BUZZER 3
@@ -55,7 +54,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 // options
 #define bpm 2000 // max: 2000 for "smooth" sampling
 int sampleRate = 60000 / bpm;
-#define INERTIA_MODE true
+#define INERTIA_MODE false
 #define INERTIA_AMOUNT 10 // number of previous values remembered
 #define MAX_DISTANCE 96 // Maximum distance to ping at (cm). Maximum sensor distance is rated at 400-500cm.
 
@@ -164,37 +163,49 @@ void anaBuzzerOff() {
   //noTone(ANA_BUZZER);
 }
 
-void setDistanceBuzzer(int val, int min, int max, int *note) {
-  int scaled = getTone(map(val, min, max, 0, 12), 1);
-  *note = scaled;
-  Serial.println(scaled);
-  tone1.tone(scaled);
-}
-
-void distSensorUpdate(int *note) {
-  delay(sampleRate);  // Wait 50ms between pings (about 20 pings/sec). 29ms should be the shortest delay between pings.
-  Serial.print("Ping: ");
-  int newDistance = sonar.ping_cm();
-  Serial.print(newDistance); // Send ping, get distance in cm and print result (0 = outside set distance range)
-  Serial.println("cm");
-  if (newDistance != 0) {
-    #ifdef INERTIA_MODE
-    int newAverage = nextSample(newDistance);
-    for (int i = 0; i < 20; i++) {
-      Serial.print(prevDists[i]); 
-      Serial.print(", ");
-    }
-    Serial.println();
-    Serial.println(newAverage);
-    setDistanceBuzzer(newAverage, 0, MAX_DISTANCE, note);
-    #else 
-    setDistanceBuzzer(newDistance, 0, MAX_DISTANCE, note);
-    #endif
+int setDistanceBuzzer(int val, int min, int max, int scaleOption) {
+  int scaleMax = 0;
+  switch (scaleOption) {
+    case 0:
+      scaleMax = 12;
+      break;
+    case 1:
+      scaleMax = 8;
+      break;
+    default:
+      scaleMax = 0;
   }
+  int note = getTone(map(val, min, max, 0, scaleMax), scaleOption);
+  Serial.println(note);
+  tone1.tone(note);
+  return note;
 }
 
-// slave communication
-void setSlave(uint8_t note) {
+int ping() {
+  Serial.print("Ping: ");
+  int ping = sonar.ping_cm();
+  Serial.print(ping); // Send ping, get distance in cm and print result (0 = outside set distance range)
+  Serial.println("cm");
+  return ping;
+}
+
+int buzzerUpdate(int pingDistance, int scaleOption) {
+  #ifdef INERTIA_MODE
+  int newAverage = nextSample(pingDistance);
+  for (int i = 0; i < 20; i++) {
+    Serial.print(prevDists[i]); 
+    Serial.print(", ");
+  }
+  Serial.println();
+  Serial.println(pingDistance);
+  return setDistanceBuzzer(newAverage, 0, MAX_DISTANCE, scaleOption);
+  #else 
+  return setDistanceBuzzer(pingDistance, 0, MAX_DISTANCE, scaleOption);
+  #endif
+}
+
+// speaker module
+void writeSpeaker(uint8_t note) {
   bool eight = (note >> 3) & (uint8_t)1;
   bool four = (note >> 2) & (uint8_t)1;
   bool two = (note >> 1) & (uint8_t)1;
@@ -227,10 +238,10 @@ void pot(int note) {
   int ana_value = map(pot_value, 0, 1023, 262, 523);
   if (analogRead(POT_PIN) > 512) {
     int ana_value = note*3.1785;
-    tone(ANA_BUZZER, ana_value);
-  } else if {
-    int ana_value = note/3.1785
-    tone(ANA_BUZZER, ana_value);
+    //tone(ANA_BUZZER, ana_value);
+  } else {
+    int ana_value = note/3.1785;
+    // tone(ANA_BUZZER, ana_value);
   }
 }
 
@@ -243,6 +254,8 @@ int getTone(int value) {
 // function to change bpm
 void metronome_bpm() {
   int joystick_value_x = analogRead(JOYSTICK_X);
+  Serial.print("joystick: ");
+  Serial.println(joystick_value_x);
   if (joystick_value_x >= 700) {
     // moving joystick to the right raises bpm
     tempo += 1;
@@ -269,20 +282,22 @@ void display_bpm() {
   display.setTextSize(4);
   display.setTextColor(WHITE);
   display.setCursor(28, 22);
-  display.println(bpm);
+  display.println(tempo);
   display.display();
 }
 
-int j = 0;
 void loop() {
-  // int note = 0;
-  // distSensorUpdate(&note);
+  int distCm = ping();
+  int note = 0;
+  if (distCm != 0) {
+    note = buzzerUpdate(distCm, 0);
+  }
+ 
   // button(note);
 
-  // // play and calculate metronome
-  // metronome_bpm();
-  // metronome_sound();
-  j++;
-  setSlave(j);
-  delay(1000);
+  // play and calculate metronome
+  metronome_bpm();
+  metronome_sound();
+
+  writeSpeaker(note+4);
 }
