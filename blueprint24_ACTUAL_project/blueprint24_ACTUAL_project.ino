@@ -285,15 +285,26 @@ void display_bpm() {
   display.println(tempo);
   display.display();
 }
+  
+int buttonPresses = 0;
+
+void buttonPress() {
+  if (digitalRead(BUTTON) == 0) {
+    if (buttonPresses == 5) {
+      buttonPresses = 0;
+    } else {
+      buttonPresses = buttonPresses + 1;
+    }
+  }
+}
 
 void loop() {
+  buttonPress();
   int distCm = ping();
   int note = 0;
   if (distCm != 0) {
     note = buzzerUpdate(distCm, 0);
   }
- 
-  // button(note);
 
   // play and calculate metronome
   metronome_bpm();
