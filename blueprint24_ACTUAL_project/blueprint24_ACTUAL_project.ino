@@ -9,14 +9,14 @@
                     3.3[------------------]10
                      5V[------------------]9 buzzer (1)
                     GND[------------------]8
-                    GND[------------------]7
+                    GND[------------------]7 Joystick button
                     Vin[------------------]6
                      A0[------------------]5
-                     A1[------------------]4
-potentiometer buzzer A2[------------------]3
-                     A3[------------------]2 button for potentiometer
-                     A4[------------------]1
-       potentiometer A5[------------------]0
+          joystick x A1[------------------]4
+potentiometer buzzer A2[------------------]3 metronnome buzzer
+       potentiometer A3[------------------]2 button for potentiometer
+                 SDA A4[------------------]1
+                 SCL A5[------------------]0
 
 
 
@@ -34,9 +34,8 @@ potentiometer buzzer A2[------------------]3
 #define ECHO_PIN     11  // Arduino pin tied to echo pin on the ultrasonic sensor.
 #define MAX_DISTANCE 48 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 #define BUTTON 2
-#define POT_PIN A5
+#define POT_PIN A3
 #define JOYSTICK_X A4
-#define JOYSTICK_Y A3
 #define JOYSTICK_BTN 3
 #define ANA_BUZZER A2
 
@@ -86,7 +85,7 @@ int nextSample(int newValue) {
 
 // buzzers
 void anaBuzzerOff() {
-  //noTone(ANA_BUZZER);
+  noTone(ANA_BUZZER);
 }
 
 void setDistanceBuzzer(int val, int min, int max) {
@@ -129,7 +128,7 @@ void button() {
 void pot() {
   int pot_value = analogRead(POT_PIN);
   int ana_value = map(pot_value, 0, 1023, 262, 523);
-  //tone(ANA_BUZZER, ana_value);
+  tone(ANA_BUZZER, ana_value);
 }
 
 void loop() {

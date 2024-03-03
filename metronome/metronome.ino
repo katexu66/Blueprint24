@@ -19,46 +19,46 @@ void setup() {
   // put your setup code here, to run once:
   display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
   Serial.begin(9600);
-  display.clearDisplay();
-  display.setTextSize(3);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 10);
-  display.println(bpm);
-  display.display();
+  display_bpm();
 
   pinMode(JOYSTICK_X, INPUT);
   pinMode(JOYSTICK_Y, INPUT);
   pinMode(JOYSTICK_BTN, INPUT_PULLUP);
 
   pinMode(BUZZER, OUTPUT);
-
-  Serial.print(analogRead(JOYSTICK_X));
 }
 
+// function to change bpm
 void metronome_bpm() {
   int joystick_value_x = analogRead(JOYSTICK_X);
   if (joystick_value_x >= 700) {
+    // moving joystick to the right raises bpm
     bpm += 1;
-    display.println(bpm);
-    Serial.println(bpm);
+    display_bpm();
   } else if (joystick_value_x <= 300) {
+    // moving joystick to the left lowers bpm
     bpm -= 1;
-    display.println(bpm);
-    Serial.println(bpm);
+    display_bpm();
   }
 }
 
+// function to play metronome at the correct bpm
 void metronome_sound() {
-  int joystick_btn_value = digitalRead(JOYSTICK_BTN);
-  Serial.print(joystick_btn_value);
-  if (joystick_btn_value == LOW) {
-    digitalWrite(BUZZER, LOW);
-  } else {
-    digitalWrite(BUZZER, HIGH);
-    delay(10);
-    digitalWrite(BUZZER, LOW);
-    delay(60000 / bpm);
-  }
+
+  digitalWrite(BUZZER, HIGH);
+  delay(10);
+  digitalWrite(BUZZER, LOW);
+  delay(60000 / bpm);
+}
+
+// function to display current bpm
+void display_bpm() {
+  display.clearDisplay();
+  display.setTextSize(4);
+  display.setTextColor(WHITE);
+  display.setCursor(28, 22);
+  display.println(bpm);
+  display.display();
 }
 void loop() {
   // put your main code here, to run repeatedly:
