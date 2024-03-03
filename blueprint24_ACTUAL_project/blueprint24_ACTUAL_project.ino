@@ -65,30 +65,6 @@ NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and
 // var for metronome
 int tempo = 100;
 
-void setup() {
-  Serial.begin(115200);  // Open serial monitor at 115200 baud
-  while(!Serial);
-  Serial.println("begin");
-
-  // pin modes
-  pinMode(BUTTON, INPUT_PULLUP);
-  pinMode(POT_PIN, INPUT);
-  pinMode(JOYSTICK_X, INPUT);
-  pinMode(JOYSTICK_BTN, INPUT_PULLUP);
-  pinMode(BUZZER, OUTPUT);
-  pinMode(ANA_BUZZER, OUTPUT);
-  pinMode(BUZZER_PWM_PIN, OUTPUT);
-  analogWrite(BUZZER_PWM_PIN, 512);
-  pinMode(ONE, OUTPUT);
-  pinMode(TWO, OUTPUT);
-  pinMode(FOUR, OUTPUT);
-  pinMode(EIGHT, OUTPUT);
-
-  // screen display
-  display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
-  display_bpm();
-}
-
 // processing 
 
 /*
@@ -136,24 +112,25 @@ int getTone(int note, int option) {
           return 2093; // C7
         default:
           return 262; // C4
-      case 2:
-        switch (value) {
-          case 0:
-            return 523; // C5
-          case 1:
-            return 587; // D5
-          case 2:
-            return 659; // E5
-          case 3:
-            return 784; // G5
-          case 4:
-            return 880; // A5
-          case 5:
-            return 1047; //C6
+      }
+    case 2:
+      switch (note) {
+        case 0:
+          return 523; // C5
+        case 1:
+          return 587; // D5
+        case 2:
+          return 659; // E5
+        case 3:
+          return 784; // G5
+        case 4:
+          return 880; // A5
+        case 5:
+          return 1047; //C6
+      }
     default:
      return 440;
   }
-  
 }
 
 int prevDists[INERTIA_AMOUNT]; // store last twenty samplings to average out and make changes smoother
@@ -313,6 +290,31 @@ void buttonPress() {
       delay(500);
     }
   }
+}
+
+void setup() {
+  Serial.begin(115200);  // Open serial monitor at 115200 baud
+  while(!Serial);
+  Serial.println("begin");
+
+  // pin modes
+  pinMode(BUTTON, INPUT_PULLUP);
+  pinMode(POT_PIN, INPUT);
+  pinMode(JOYSTICK_X, INPUT);
+  pinMode(JOYSTICK_BTN, INPUT_PULLUP);
+  pinMode(BUZZER, OUTPUT);
+  pinMode(ANA_BUZZER, OUTPUT);
+  pinMode(BUZZER_PWM_PIN, OUTPUT);
+  analogWrite(BUZZER_PWM_PIN, 512);
+  pinMode(ONE, OUTPUT);
+  pinMode(TWO, OUTPUT);
+  pinMode(FOUR, OUTPUT);
+  pinMode(EIGHT, OUTPUT);
+
+  // screen display
+  display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
+  display_bpm();
+  Serial.println("end init");
 }
 
 int metct = 0;
