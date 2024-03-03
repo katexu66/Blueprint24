@@ -35,8 +35,7 @@ potentiometer buzzer A2[------------------]3 metronnome buzzer
 #define ECHO_PIN     11  // Arduino pin tied to echo pin on the ultrasonic sensor.
 #define BUTTON 2
 #define POT_PIN A3
-#define JOYSTICK_X A4
-#define JOYSTICK_Y A1
+#define JOYSTICK_X A1
 #define JOYSTICK_BTN 7
 #define ANA_BUZZER A2
 #define BUZZER 3
@@ -212,28 +211,6 @@ void setSlave(uint8_t note) {
   digitalWrite(ONE, one);
 }
 
-// input 
-void button(int note) {
-  if (digitalRead(BUTTON) == 0) {
-    pot(note);
-  } else {
-    anaBuzzerOff();
-  }
-}
-
-void pot(int note) {
-  int pot_value = analogRead(POT_PIN);
-  //int scaled = getTone(map(val, min, max, 0, 12), 1);
-  int ana_value = map(pot_value, 0, 1023, 262, 523);
-  if (analogRead(POT_PIN) > 512) {
-    int ana_value = note*3.1785;
-    tone(ANA_BUZZER, ana_value);
-  } else if {
-    int ana_value = note/3.1785
-    tone(ANA_BUZZER, ana_value);
-  }
-}
-
 // processing
 int getTone(int value) {
   return 440 * pow(1.0594631, value);
@@ -273,11 +250,23 @@ void display_bpm() {
   display.display();
 }
 
+int buttonPresses = 0;
+
+void buttonPress() {
+  if (digitalRead(BUTTON) == 0) {
+    if (buttonPresses == 5) {
+      buttonPresses = 0;
+    } else {
+      buttonPresses = buttonPresses + 1;
+    }
+  }
+}
+
 int j = 0;
 void loop() {
   // int note = 0;
   // distSensorUpdate(&note);
-  // button(note);
+  buttonPress();
 
   // // play and calculate metronome
   // metronome_bpm();
